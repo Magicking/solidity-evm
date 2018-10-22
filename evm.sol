@@ -2,12 +2,12 @@ pragma solidity ^0.4.25;
 
 contract SolidityEVM {
 
-	enum Exception {NO_EXCEPTION, Halt, OutOfGas, TODO}
+	enum Exception {NO_EXCEPTION, Halt, OutOfGas, Throw, InvalidOpcode}
 
 	struct OpCode {
 		uint Ins;
 		uint Outs;
-		uint Gas;
+		int Gas;
 		uint flags;
 	}
 
@@ -16,13 +16,14 @@ contract SolidityEVM {
 		uint StackPtr;
 		bytes Mem;
 		bytes Code;
+		bytes Input;
 		uint PC;
 		int GasLeft;
 	}
 
 	OpCode[] public OpCodes;
 
-	function SolidityEVM() public {
+	constructor() public {
 		OpCodes.length = 256; // TBD Metropolis/Byzantium/Custom
 		/* python
 		Get Opcodes lists from https://github.com/CoinCulture/evm-tools/blob/master/analysis/guide.md and run
@@ -616,37 +617,101 @@ contract SolidityEVM {
 	}
 
 	/*
-	* @dev Evaluate the last decoded instruction
+	* @dev Evaluate the last decoded instruction JULIA flavor
 	*/
-	function eval(Context memory ctx, bytes memory data, uint256 instruction) internal returns (Exception) {
-		switch instruction {
-		assembly {
-			let x := ctx.Code[ctx.]
-			switch instruction
-			case 0 {
-				//return with Halt
-			}
-			/*
-			   case X {
+	function evalJULIA(Context memory ctx, uint256 instruction) internal returns (Exception) {
+		Exception ret;
 
-			   }
-			*/
+		assembly {
+			switch instruction
+			case 0x00 { // STOP
+				ret := 1 // Exception.Halt
+			}
+			case 0x01 {
+				// push OpCodes[instruction].Ins
+				// add
+				// pop  OpCodes[instruction].Outs
+				// set memory
+			}
 			default {
+				ret := 2 // Exception.Throw
 				//throw
 			}
 		}
+
+		return ret;
+	}
+
+	/*
+	* @dev Pop uint256 from stack
+	*/
+	function _pop(Context memory ctx) internal returns (uint256) {
+		if (ctx.StackPtr == 0) {
+			revert(); // handle failure
+		}
+		ctx.StackPtr--;
+		return ctx.Stack[ctx.StackPtr];
+	}
+
+	/*
+	* @dev Push uint256 from stack
+	*/
+	function _push(Context memory ctx, uint256 value) internal {
+/*		if (ctx.StackPtr == MAX_uint256) {
+			revert(); // handle failure
+		}*/
+
+		ctx.Stack[ctx.StackPtr] = value;
+		ctx.StackPtr++;
+	}
+
+	/*
+	* @dev Evaluate the last decoded instruction Solidity flavor
+	*/
+	function eval(Context memory ctx, uint256 instruction) internal returns (Exception) {
+
+		if (instruction == 0x00) {
+			return Exception.Halt;
+		}
+		if (instruction == 0x01) { // ADD
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, _pop(ctx) +_pop(ctx));
+			ctx.PC++;
+			return Exception.NO_EXCEPTION;
+		}
+		if (instruction == 0x60) { // PUSH1
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, uint256(ctx.Code[ctx.PC+1]));
+			ctx.PC += 2;
+			return Exception.NO_EXCEPTION;
+		}
+		// ...
+		return Exception.InvalidOpcode;
 	}
 
 	/*
 	* @dev data, is calldata
 	*/
+	/*
+	struct Context {
+		uint[] Stack;
+		uint StackPtr;
+		bytes Mem;
+		bytes Code;
+		bytes Input;
+		uint PC;
+		int GasLeft;
+	}
+	 */
 	function run(bytes code, bytes data) public returns (bool) {
 		Context memory ctx;
 		ctx.Code = code;
+		ctx.Input = data;
 		Exception ret;
-		while(ret == NO_EXCEPTION) {
-			ret = eval(ctx, data, uint256(code[ctx.PC]));
+		while(ret == Exception.NO_EXCEPTION) {
+			ret = eval(ctx, uint256(code[ctx.PC]));
 			// check gas low remaining
+			// act on return
 		}
 	}
 
