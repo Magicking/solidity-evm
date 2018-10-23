@@ -1,4 +1,5 @@
 pragma solidity ^0.4.25;
+pragma experimental ABIEncoderV2;
 
 contract SolidityEVM {
 
@@ -15,6 +16,8 @@ contract SolidityEVM {
 		uint[] Stack;
 		uint StackPtr;
 		bytes Mem;
+		uint256 RetOffset;
+		uint256 RetSize;
 		bytes Code;
 		bytes Input;
 		uint PC;
@@ -185,16 +188,6 @@ contract SolidityEVM {
 		OpCodes[55].Outs = 0;
 		OpCodes[55].Gas = 3;
 
-		//CODESIZE
-		OpCodes[56].Ins = 0;
-		OpCodes[56].Outs = 1;
-		OpCodes[56].Gas = 2;
-
-		//CODECOPY
-		OpCodes[57].Ins = 3;
-		OpCodes[57].Outs = 0;
-		OpCodes[57].Gas = 3;
-
 		//POP
 		OpCodes[80].Ins = 1;
 		OpCodes[80].Outs = 0;
@@ -214,16 +207,6 @@ contract SolidityEVM {
 		OpCodes[83].Ins = 2;
 		OpCodes[83].Outs = 0;
 		OpCodes[83].Gas = 3;
-
-		//SLOAD
-		OpCodes[84].Ins = 1;
-		OpCodes[84].Outs = 1;
-		OpCodes[84].Gas = 50;
-
-		//SSTORE
-		OpCodes[85].Ins = 2;
-		OpCodes[85].Outs = 0;
-		OpCodes[85].Gas = 0;
 
 		//JUMP
 		OpCodes[86].Ins = 1;
@@ -284,11 +267,6 @@ contract SolidityEVM {
 		OpCodes[243].Ins = 2;
 		OpCodes[243].Outs = 0;
 		OpCodes[243].Gas = 0;
-
-		//DELEGATECALL
-		OpCodes[244].Ins = 6;
-		OpCodes[244].Outs = 0;
-		OpCodes[244].Gas = 40;
 
 		//SUICIDE
 		OpCodes[255].Ins = 1;
@@ -616,36 +594,36 @@ contract SolidityEVM {
 		OpCodes[159].Gas = 3;
 	}
 
-	/*
-	* @dev Evaluate the last decoded instruction JULIA flavor
-	*/
-	function evalJULIA(Context memory ctx, uint256 instruction) internal returns (Exception) {
-		Exception ret;
-
-		assembly {
-			switch instruction
-			case 0x00 { // STOP
-				ret := 1 // Exception.Halt
-			}
-			case 0x01 {
-				// push OpCodes[instruction].Ins
-				// add
-				// pop  OpCodes[instruction].Outs
-				// set memory
-			}
-			default {
-				ret := 2 // Exception.Throw
-				//throw
-			}
-		}
-
-		return ret;
-	}
+//	/*
+//	* @dev Evaluate the last decoded instruction JULIA flavor
+//	*/
+//	function evalJULIA(Context memory ctx, uint256 instruction) internal returns (Exception) {
+//		Exception ret;
+//
+//		assembly {
+//			switch instruction
+//			case 0x00 { // STOP
+//				ret := 1 // Exception.Halt
+//			}
+//			case 0x01 {
+//				// push OpCodes[instruction].Ins
+//				// add
+//				// pop  OpCodes[instruction].Outs
+//				// set memory
+//			}
+//			default {
+//				ret := 2 // Exception.Throw
+//				//throw
+//			}
+//		}
+//
+//		return ret;
+//	}
 
 	/*
 	* @dev Pop uint256 from stack
 	*/
-	function _pop(Context memory ctx) internal returns (uint256) {
+	function _pop(Context memory ctx) internal pure returns (uint256) {
 		if (ctx.StackPtr == 0) {
 			revert(); // handle failure
 		}
@@ -656,21 +634,40 @@ contract SolidityEVM {
 	/*
 	* @dev Push uint256 from stack
 	*/
-	function _push(Context memory ctx, uint256 value) internal {
-/*		if (ctx.StackPtr == MAX_uint256) {
+	function _push(Context memory ctx, uint256 value) internal pure {
+		if (ctx.StackPtr > 1024) { // stack size max, see Yellow Paper: 9.1 and 9.4.2.
 			revert(); // handle failure
-		}*/
+		}
 
 		ctx.Stack[ctx.StackPtr] = value;
 		ctx.StackPtr++;
 	}
 
 	/*
+	* @dev Set uint256 to memory
+	*/
+//	function _setUint256(Context memory ctx, uint256 offset, uint256 value) internal {
+//		if (offset > ctx.Mem.length) {
+//			ctx.Mem.length = offset + 0x20; // 256-bit word, see Yellow Paper: 9.1. 0x20
+//		}
+//		ctx.Mem[offset] = value;
+//	}
+
+	/*
+	* @dev Set bytes to memory
+	*/
+//	function _setBytes(Context memory ctx, uint256 offset, bytes data) internal {
+//		bytes(ctx.Stack)[ctx.StackPtr] = data;
+//		ctx.StackPtr++;
+//	}
+
+	/*
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
-	function eval(Context memory ctx, uint256 instruction) internal returns (Exception) {
+	function eval(Context memory ctx, uint256 instruction) internal view returns (Exception) {
 
 		if (instruction == 0x00) {
+			ctx.Mem[0] = byte(0);
 			return Exception.Halt;
 		}
 		if (instruction == 0x01) { // ADD
@@ -684,6 +681,11 @@ contract SolidityEVM {
 			_push(ctx, uint256(ctx.Code[ctx.PC+1]));
 			ctx.PC += 2;
 			return Exception.NO_EXCEPTION;
+		}
+		if (instruction == 0xf3) { // RETURN
+			ctx.RetOffset = _pop(ctx);
+			ctx.RetSize = _pop(ctx) - ctx.RetOffset;
+			return Exception.Halt;
 		}
 		// ...
 		return Exception.InvalidOpcode;
@@ -703,16 +705,21 @@ contract SolidityEVM {
 		int GasLeft;
 	}
 	 */
-	function run(bytes code, bytes data) public returns (bool) {
+
+	//function runAtAddress(address account, bytes data) ...
+
+	function run(bytes code, bytes data) public view returns (Context) {
 		Context memory ctx;
 		ctx.Code = code;
 		ctx.Input = data;
+		ctx.GasLeft = 0x80000; // TBD
 		Exception ret;
 		while(ret == Exception.NO_EXCEPTION) {
+			// check gas remaining
 			ret = eval(ctx, uint256(code[ctx.PC]));
-			// check gas low remaining
 			// act on return
 		}
+		return ctx;
 	}
 
 }
