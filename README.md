@@ -12,17 +12,25 @@ opcode.
 
 ```
 //Landlord.sol deployed @ 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be
-function Do() {
+contract Landlord {
+modifier canDestruct() {
 	...
-	evm.RunAtAddress(0x832658CEcFC4fb19661C3B8Bbd04A3A3720efe1e, 0x2be5e0b2)
+	evm.RunAtAddress(msg.sender, 0x2be5e0b2)
 	// check if `suicide exception` with returning address properly set
 	...
 }
-
+function Register() canDestruct {
+	// Register to oracle for service
+}
+```
+```
 //Tenant.sol deployed @ 0x832658CEcFC4fb19661C3B8Bbd04A3A3720efe1e
 function _eviction() pure { // function selector 0x2be5e0b2
 	require(msg.sender == 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be
 	selfdestruct(0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be);
+}
+function constructor(address landlord) {
+	Landlord(landlord).Register()
 }
 ```
 
@@ -39,6 +47,7 @@ C -->|Any other exception| E[revert]
 
 See https://ethresear.ch/t/paying-rent-with-deposits/2221
 Old draft & related ideas: https://ethresear.ch/t/state-channel-toy-implementation/1495
+Other idea: implement an oracle/DNS on top of that.
 
 ## Implemented opcode
 
@@ -73,6 +82,8 @@ Old draft & related ideas: https://ethresear.ch/t/state-channel-toy-implementati
  - [ ] CALLDATALOAD
  - [ ] CALLDATASIZE
  - [ ] CALLDATACOPY
+ - [ ] CODESIZE
+ - [ ] CODECOPY
  - [ ] POP
  - [ ] MLOAD
  - [ ] MSTORE
