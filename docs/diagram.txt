@@ -1,0 +1,6 @@
+graph TD
+A[Solidity EVM] -->|Address CodeInputData: SUICIDEPAYLOAD| B(Run)
+B --> C{Eval}
+C --> |next|C
+C -->|Suicide exception| D[Register-able]
+C -->|Any other exception| E[revert]

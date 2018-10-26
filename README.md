@@ -43,10 +43,11 @@ This mechanism could enforce a final rent payment would be payable to the Landlo
 graph TD
 A[Solidity EVM] -->|Address CodeInputData: SUICIDEPAYLOAD| B(Run)
 B --> C{Eval}
+C --> |next|C
 C -->|Suicide exception| D[Register-able]
 C -->|Any other exception| E[revert]
 ```
-[Execution flow](https://mermaidjs.github.io/mermaid-live-editor/#/view/eyJjb2RlIjoiZ3JhcGggVERcbkFbU29saWRpdHkgRVZNXSAtLT58QWRkcmVzcyBDb2RlSW5wdXREYXRhOiBTVUlDSURFUEFZTE9BRHwgQihSdW4pXG5CIC0tPiBDe0V2YWx9XG5DIC0tPnxTdWljaWRlIGV4Y2VwdGlvbnwgRFtSZWdpc3Rlci1hYmxlXVxuQyAtLT58QW55IG90aGVyIGV4Y2VwdGlvbnwgRVtyZXZlcnRdIiwibWVybWFpZCI6eyJ0aGVtZSI6ImRlZmF1bHQifX0)
+![Execution flow](docs/diagram.svg)
 
 See https://ethresear.ch/t/paying-rent-with-deposits/2221
 Old draft & related ideas: https://ethresear.ch/t/state-channel-toy-implementation/1495
