@@ -3,13 +3,13 @@ pragma experimental ABIEncoderV2;
 
 contract SolidityEVM {
 
-	enum Exception {NO_EXCEPTION, Halt, OutOfGas, Throw, InvalidOpcode}
+	enum Exception {NO_EXCEPTION, Halt, OutOfGas, Throw, InvalidOpcode, InvalidCode, InvalidDestination}
 
 	struct OpCode {
-		uint Ins;
-		uint Outs;
+		uint8 Ins;
+		uint8 Outs;
 		int Gas;
-		uint flags;
+		uint8 flags;
 	}
 
 	struct Context {
@@ -22,8 +22,10 @@ contract SolidityEVM {
 		bytes Input;
 		uint PC;
 		int GasLeft;
+		Exception StopReason;
 	}
 
+	Context public _ctx;
 	OpCode[] public OpCodes;
 
 	constructor() public {
@@ -34,6 +36,7 @@ contract SolidityEVM {
 		Some opcodes are missings (CREATE2, ...)
 		   */
 		//STOP
+        
 		OpCodes[0].Ins = 0;
 		OpCodes[0].Outs = 0;
 		OpCodes[0].Gas = 0;
@@ -42,7 +45,7 @@ contract SolidityEVM {
 		OpCodes[1].Ins = 2;
 		OpCodes[1].Outs = 1;
 		OpCodes[1].Gas = 3;
-
+/*
 		//MUL
 		OpCodes[2].Ins = 2;
 		OpCodes[2].Outs = 1;
@@ -262,7 +265,7 @@ contract SolidityEVM {
 		OpCodes[164].Ins = 6;
 		OpCodes[164].Outs = 0;
 		OpCodes[164].Gas = 1875;
-
+*/
 		//RETURN
 		OpCodes[243].Ins = 2;
 		OpCodes[243].Outs = 0;
@@ -277,7 +280,7 @@ contract SolidityEVM {
 		OpCodes[96].Ins = 0;
 		OpCodes[96].Outs = 1;
 		OpCodes[96].Gas = 3;
-
+/*
 		//PUSH2
 		OpCodes[97].Ins = 0;
 		OpCodes[97].Outs = 1;
@@ -591,7 +594,7 @@ contract SolidityEVM {
 		//SWAP16
 		OpCodes[159].Ins = 17;
 		OpCodes[159].Outs = 17;
-		OpCodes[159].Gas = 3;
+		OpCodes[159].Gas = 3;*/
 	}
 
 //	/*
@@ -623,7 +626,7 @@ contract SolidityEVM {
 	/*
 	* @dev Pop uint256 from stack
 	*/
-	function _pop(Context memory ctx) internal pure returns (uint256) {
+	function _pop(Context storage ctx) internal returns (uint256) {
 		if (ctx.StackPtr == 0) {
 			revert(); // handle failure
 		}
@@ -634,12 +637,12 @@ contract SolidityEVM {
 	/*
 	* @dev Push uint256 from stack
 	*/
-	function _push(Context memory ctx, uint256 value) internal pure {
+	function _push(Context storage ctx, uint256 value) internal {
 		if (ctx.StackPtr > 1024) { // stack size max, see Yellow Paper: 9.1 and 9.4.2.
 			revert(); // handle failure
 		}
 
-		ctx.Stack[ctx.StackPtr] = value;
+		ctx.Stack.push(value);
 		ctx.StackPtr++;
 	}
 
@@ -664,9 +667,11 @@ contract SolidityEVM {
 	/*
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
-	function eval(Context memory ctx, uint256 instruction) internal view returns (Exception) {
+	function eval(Context storage ctx, uint256 instruction) internal returns (Exception) {
 
 		if (instruction == 0x00) {
+			if (ctx.Mem.length == 0)
+				ctx.Mem.push(0);
 			ctx.Mem[0] = byte(0);
 			return Exception.Halt;
 		}
@@ -708,17 +713,30 @@ contract SolidityEVM {
 
 	//function runAtAddress(address account, bytes data) ...
 
-	function run(bytes code, bytes data) public view returns (Context) {
-		Context memory ctx;
+	function stopReasonRun(bytes code, bytes data) public returns (Exception) {
+		return run(code, data).StopReason;
+	}
+
+	function run(bytes code, bytes data) public returns (Context) {
+		Context storage ctx = _ctx;
 		ctx.Code = code;
 		ctx.Input = data;
 		ctx.GasLeft = 0x80000; // TBD
 		Exception ret;
+
+		if (code.length == 0)
+			ret = Exception.InvalidCode;
+
 		while(ret == Exception.NO_EXCEPTION) {
 			// check gas remaining
 			ret = eval(ctx, uint256(code[ctx.PC]));
 			// act on return
+			if (ctx.PC >= code.length){
+				ret = Exception.InvalidDestination;
+				break;
+			}
 		}
+		ctx.StopReason = ret;
 		return ctx;
 	}
 
