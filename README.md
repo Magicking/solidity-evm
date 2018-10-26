@@ -13,40 +13,40 @@ opcode.
 ```javascript
 //Landlord.sol deployed @ 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be
 contract Landlord {
-    modifier canDestruct() {
-    	...
-    	evm.RunAtAddress(msg.sender, 0x2be5e0b2)
-    	// check if `suicide exception` with returning address properly set
-    	...
-    }
-    function Register() canDestruct {
-    	// Register to oracle for service
-    }
+	modifier canDestruct() {
+		...
+		evm.RunAtAddress(msg.sender, 0x2be5e0b2); // _eviction() function selector
+		// check if `suicide exception` with returning address properly set
+		...
+	}
+
+	function Register() canDestruct {
+		// Register to oracle for service
+	}
 }
 
 //Tenant.sol deployed @ 0x832658CEcFC4fb19661C3B8Bbd04A3A3720efe1e
 contract Tenant {
-    function _eviction() pure { // function selector 0x2be5e0b2
-    	require(msg.sender == 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be
-    	selfdestruct(0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be);
-    }
-    function constructor(address landlord) {
-    	Landlord(landlord).Register()
-    }
+	address TenantOwner;
+
+	constructor(address owner) {
+		TenantOwner = owner;
+	}
+
+	function _eviction() pure { // function selector 0x2be5e0b2
+		require(msg.sender == 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be); // TODO add way to use storage for this particular usage
+		selfdestruct(TenantOwner);
+	}
+
+	function constructor(address landlord) {
+		Landlord(landlord).Register();
+	}
 }
 
 ```
 
 This mechanism could enforce a final rent payment would be payable to the Landlord or `Service Provider`.
 
-```
-graph TD
-A[Solidity EVM] -->|Address CodeInputData: SUICIDEPAYLOAD| B(Run)
-B --> C{Eval}
-C --> |next|C
-C -->|Suicide exception| D[Register-able]
-C -->|Any other exception| E[revert]
-```
 ![Execution flow](docs/diagram.svg)
 
 See https://ethresear.ch/t/paying-rent-with-deposits/2221

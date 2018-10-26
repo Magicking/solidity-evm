@@ -1,6 +1,7 @@
 graph TD
-A[Solidity EVM] -->|Address CodeInputData: SUICIDEPAYLOAD| B(Run)
+T[Landlord Service Provider] --> A
+A[Solidity EVM] -->| Tenant -> _eviction| B(Run)
 B --> C{Eval}
 C --> |next|C
-C -->|Suicide exception| D[Register-able]
+C -->|Suicide to TenantOwner| D[Register-able]
 C -->|Any other exception| E[revert]
