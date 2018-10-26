@@ -51,6 +51,12 @@ C -->|Any other exception| E[revert]
 See https://ethresear.ch/t/paying-rent-with-deposits/2221
 Old draft & related ideas: https://ethresear.ch/t/state-channel-toy-implementation/1495
 Other idea: implement an oracle/DNS on top of that.
+[Execute EVM inside EVM](https://github.com/ethereum/EIPs/issues/726)
+
+## Development requirements
+
+ * Truffle >= 5.0.0
+ * Solidity v0.4.25
 
 ## Implemented opcode
 
