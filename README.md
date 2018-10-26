@@ -1,7 +1,7 @@
 # Solidity EVM
 
 Solidity EVM is a restricted Ethereum Virtual Machine interpreter, it
-interprets only `pure` solidity-wise EVM bytecode otherwise this implementation
+interprets only `pure` (and exceptions) solidity-wise EVM bytecode otherwise this implementation
 should throw an invalid opcode.
 
 ## Idea
