@@ -3,7 +3,7 @@ pragma experimental ABIEncoderV2;
 
 contract SolidityEVM {
 
-	enum Exception {NO_EXCEPTION, Halt, OutOfGas, Throw, InvalidOpcode, InvalidCode, InvalidDestination}
+	enum Exception {NO_EXCEPTION, Halt, OutOfGas, Throw, InvalidOpcode, InvalidCode, InvalidDestination, StackUndeflow, StackOverflow}
 
 	struct OpCode {
 		uint8 Ins;
@@ -628,7 +628,8 @@ contract SolidityEVM {
 	*/
 	function _pop(Context storage ctx) internal returns (uint256) {
 		if (ctx.StackPtr == 0) {
-			revert(); // handle failure
+			ctx.StopReason = Exception.StackUndeflow;
+			return 0;
 		}
 		ctx.StackPtr--;
 		return ctx.Stack[ctx.StackPtr];
@@ -638,11 +639,16 @@ contract SolidityEVM {
 	* @dev Push uint256 from stack
 	*/
 	function _push(Context storage ctx, uint256 value) internal {
-		if (ctx.StackPtr > 1024) { // stack size max, see Yellow Paper: 9.1 and 9.4.2.
-			revert(); // handle failure
+		if (ctx.StackPtr == 1024) { // stack size max, see Yellow Paper: 9.1 and 9.4.2.
+			ctx.StopReason = Exception.StackOverflow;
+			return;
 		}
 
-		ctx.Stack.push(value);
+		if (ctx.StackPtr < ctx.Stack.length) {
+			ctx.Stack[ctx.StackPtr] = value;
+		} else {
+			ctx.Stack.push(value);
+		}
 		ctx.StackPtr++;
 	}
 
@@ -667,33 +673,42 @@ contract SolidityEVM {
 	/*
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
-	function eval(Context storage ctx, uint256 instruction) internal returns (Exception) {
+	function eval(Context storage ctx, uint256 instruction) internal {
 
 		if (instruction == 0x00) {
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
 			ctx.Mem[0] = byte(0);
-			return Exception.Halt;
+			ctx.StopReason = Exception.Halt;
+			return;
 		}
 		if (instruction == 0x01) { // ADD
 			ctx.GasLeft -= OpCodes[instruction].Gas;
-			_push(ctx, _pop(ctx) +_pop(ctx));
+			_push(ctx, _pop(ctx) + _pop(ctx));
 			ctx.PC++;
-			return Exception.NO_EXCEPTION;
+			return;
 		}
 		if (instruction == 0x60) { // PUSH1
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_push(ctx, uint256(ctx.Code[ctx.PC+1]));
 			ctx.PC += 2;
-			return Exception.NO_EXCEPTION;
+			return;
+		}
+		if (instruction == 0x80) { // POP
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_pop(ctx);
+			ctx.PC += 1;
+			return;
 		}
 		if (instruction == 0xf3) { // RETURN
 			ctx.RetOffset = _pop(ctx);
 			ctx.RetSize = _pop(ctx) - ctx.RetOffset;
-			return Exception.Halt;
+			if (ctx.StopReason == Exception.NO_EXCEPTION) // Avoid rewriting exception
+				ctx.StopReason = Exception.Halt;
+			return;
 		}
 		// ...
-		return Exception.InvalidOpcode;
+		ctx.StopReason = Exception.InvalidOpcode;
 	}
 
 	/*
@@ -722,21 +737,18 @@ contract SolidityEVM {
 		ctx.Code = code;
 		ctx.Input = data;
 		ctx.GasLeft = 0x80000; // TBD
-		Exception ret;
 
 		if (code.length == 0)
-			ret = Exception.InvalidCode;
+			ctx.StopReason = Exception.InvalidCode;
 
-		while(ret == Exception.NO_EXCEPTION) {
+		while(ctx.StopReason == Exception.NO_EXCEPTION) {
 			// check gas remaining
-			ret = eval(ctx, uint256(code[ctx.PC]));
-			// act on return
+			eval(ctx, uint256(code[ctx.PC]));
 			if (ctx.PC >= code.length){
-				ret = Exception.InvalidDestination;
+				ctx.StopReason = Exception.InvalidDestination;
 				break;
 			}
 		}
-		ctx.StopReason = ret;
 		return ctx;
 	}
 
