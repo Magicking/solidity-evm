@@ -73,8 +73,8 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] MULMOD
  - [ ] EXP
  - [ ] SIGNEXTEND
- - [ ] LT
- - [ ] GT
+ - [x] LT
+ - [x] GT
  - [ ] SLT
  - [ ] SGT
  - [ ] EQ

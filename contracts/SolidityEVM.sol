@@ -694,6 +694,20 @@ contract SolidityEVM {
 			ctx.PC += 2;
 			return;
 		}
+		if (instruction == 0x10) { // LT
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			uint256 a10 = _pop(ctx); //us[1]
+			_push(ctx, a10 > _pop(ctx) ? 1 : 0);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x11) { // GT
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			uint256 a11 = _pop(ctx); //us[1]
+			_push(ctx, a11 < _pop(ctx) ? 1 : 0);
+			ctx.PC += 1;
+			return;
+		}
 		if (instruction == 0x80) { // POP
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_pop(ctx);
@@ -728,6 +742,9 @@ contract SolidityEVM {
 
 	//function runAtAddress(address account, bytes data) ...
 
+	function stackRun(bytes code, bytes data) public returns (uint[]) {
+		return run(code, data).Stack;
+	}
 	function stopReasonRun(bytes code, bytes data) public returns (Exception) {
 		return run(code, data).StopReason;
 	}

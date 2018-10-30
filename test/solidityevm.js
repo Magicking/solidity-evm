@@ -24,6 +24,38 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret.valueOf(), 7, "StackUnderflow was not the exit opcode");
     });
   });
+ it("run push1 0x00 push1 0xff lt", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "600060ff10";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 1, "LT failed");
+    });
+  });
+ it("run push1 0x88 push1 0x77 lt", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "6088607710";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 0, "LT failed");
+    });
+  });
+ it("run push1 0xff push1 0x0f gt", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "60ff600f11";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 1, "LT failed");
+    });
+  });
+ it("run push1 0x00 push1 0xff gt", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "600060ff11";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 0, "LT failed");
+    });
+  });
   it("run 1025 push1 stop", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "6042".repeat(1025);
