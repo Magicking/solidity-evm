@@ -674,7 +674,7 @@ contract SolidityEVM {
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
 	function eval(Context storage ctx, uint256 instruction) internal {
-		uint256 r1;
+		uint256 r1; // us[] is stack, r1 stand for register
 		if (instruction == 0x00) {
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
