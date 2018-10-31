@@ -1,5 +1,8 @@
 # Solidity EVM
 
+[![CircleCI](https://circleci.com/gh/Magicking/solidity-evm.svg?style=svg)](https://circleci.com/gh/Magicking/solidity-evm)
+[![codecov](https://codecov.io/gh/Magicking/solidity-evm/branch/master/graph/badge.svg)](https://codecov.io/gh/Magicking/solidity-evm)
+
 Solidity EVM is a restricted Ethereum Virtual Machine interpreter, it
 interprets only `pure` (and exceptions) solidity-wise EVM bytecode otherwise this implementation
 should throw an invalid opcode.
