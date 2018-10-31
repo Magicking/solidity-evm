@@ -12,12 +12,12 @@ jobs:
      - run:
          name: Install dependencies
          command: |
-           npm install
+           yarn install
      - run:
          name: Run tests
          command: |
-           npm run solidity-coverage test-cov
+           yarn run solidity-coverage coverage
      - run:
          name: Upload coverage
          command: |
-           bash <(curl -s https://codecov.io/bash)
+           yarn run coveralls < coverage/lcov.info
