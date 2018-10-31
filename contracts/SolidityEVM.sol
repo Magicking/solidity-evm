@@ -674,7 +674,7 @@ contract SolidityEVM {
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
 	function eval(Context storage ctx, uint256 instruction) internal {
-
+		uint256 r1;
 		if (instruction == 0x00) {
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
@@ -696,15 +696,28 @@ contract SolidityEVM {
 		}
 		if (instruction == 0x10) { // LT
 			ctx.GasLeft -= OpCodes[instruction].Gas;
-			uint256 a10 = _pop(ctx); //us[1]
-			_push(ctx, a10 > _pop(ctx) ? 1 : 0);
+			r1 = _pop(ctx); //us[1]
+			_push(ctx, r1 > _pop(ctx) ? 1 : 0);
 			ctx.PC += 1;
 			return;
 		}
 		if (instruction == 0x11) { // GT
 			ctx.GasLeft -= OpCodes[instruction].Gas;
-			uint256 a11 = _pop(ctx); //us[1]
-			_push(ctx, a11 < _pop(ctx) ? 1 : 0);
+			r1 = _pop(ctx); //us[1]
+			_push(ctx, r1 < _pop(ctx) ? 1 : 0);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x14) { // EQ
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx); //us[1]
+			_push(ctx, r1 == _pop(ctx) ? 1 : 0);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x15) { // ISZERO
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, _pop(ctx) == 0 ? 1 : 0);
 			ctx.PC += 1;
 			return;
 		}

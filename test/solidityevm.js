@@ -56,6 +56,38 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0, "LT failed");
     });
   });
+ it("run push1 0xff push1 0xff eq", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "60ff60ff14";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 1, "eq failed");
+    });
+  });
+ it("run push1 0x00 iszero", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "600015";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 1, "eq failed");
+    });
+  });
+ it("run push1 0xff iszero", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "60ff15";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 0, "eq failed");
+    });
+  });
+ it("run push1 0x00 push1 0xff eq", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "600060ff14";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 0, "eq failed");
+    });
+  });
   it("run 1025 push1 stop", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "6042".repeat(1025);
