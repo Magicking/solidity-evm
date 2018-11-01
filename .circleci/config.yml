@@ -14,6 +14,10 @@ jobs:
          command: |
            yarn install
      - run:
+         name: Run build
+         command: |
+           yarn run truffle compile
+     - run:
          name: Run tests
          command: |
            yarn run solidity-coverage coverage
