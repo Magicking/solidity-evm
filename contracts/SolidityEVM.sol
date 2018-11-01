@@ -694,7 +694,7 @@ contract SolidityEVM {
 			ctx.PC++;
 			return;
 		}
-		if (0x60 <= instruction && instruction <= 0x7f) { // PUSH1
+		if (0x60 <= instruction && instruction <= 0x7f) { // PUSHXX
 			uint256 out;
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			for (uint i = 0; i < (instruction-0x5f); i++)
