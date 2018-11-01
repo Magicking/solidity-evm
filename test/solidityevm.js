@@ -80,6 +80,14 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0, "eq failed");
     });
   });
+ it("run push1 0x02 push1 0x02 mul push 0x04 eq", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "6002600202600414";
+      return instance.stackRun.call("0x"+code,"0x00");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 1, "eq failed");
+    });
+  });
  it("run push1 0x00 push1 0xff eq", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "600060ff14";

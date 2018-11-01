@@ -688,6 +688,12 @@ contract SolidityEVM {
 			ctx.PC++;
 			return;
 		}
+		if (instruction == 0x02) { // MUL
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, _pop(ctx) * _pop(ctx));
+			ctx.PC++;
+			return;
+		}
 		if (instruction == 0x60) { // PUSH1
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_push(ctx, uint256(ctx.Code[ctx.PC+1]));
