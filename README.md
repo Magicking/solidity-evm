@@ -80,8 +80,8 @@ Other idea: implement an oracle/DNS on top of that.
  - [x] GT
  - [ ] SLT
  - [ ] SGT
- - [ ] EQ
- - [ ] ISZERO
+ - [x] EQ
+ - [x] ISZERO
  - [ ] AND
  - [ ] OR
  - [ ] XOR
@@ -97,7 +97,7 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] CALLDATACOPY
  - [ ] CODESIZE
  - [ ] CODECOPY
- - [ ] POP
+ - [x] POP
  - [ ] MLOAD
  - [ ] MSTORE
  - [ ] MSTORE8
