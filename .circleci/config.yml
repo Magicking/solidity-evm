@@ -1,0 +1,27 @@
+version: 2.0
+jobs:
+ build:
+   docker:
+     - image: node:10
+   steps:
+     - checkout
+     - run:
+         name: Delete any old node_modules
+         command: |
+           rm -rf node_modules/
+     - run:
+         name: Install dependencies
+         command: |
+           yarn install
+     - run:
+         name: Run build
+         command: |
+           yarn run truffle compile
+     - run:
+         name: Run tests
+         command: |
+           yarn run solidity-coverage coverage
+     - run:
+         name: Upload coverage
+         command: |
+           yarn run coveralls < coverage/lcov.info

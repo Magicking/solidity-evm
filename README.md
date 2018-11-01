@@ -1,5 +1,8 @@
 # Solidity EVM
 
+[![CircleCI](https://circleci.com/gh/Magicking/solidity-evm/tree/master.svg?style=shield)](https://circleci.com/gh/Magicking/solidity-evm/tree/master)
+[![Coverage Status](https://coveralls.io/repos/github/Magicking/solidity-evm/badge.svg?branch=master)](https://coveralls.io/github/Magicking/solidity-evm?branch=master)
+
 Solidity EVM is a restricted Ethereum Virtual Machine interpreter, it
 interprets only `pure` (and exceptions) solidity-wise EVM bytecode otherwise this implementation
 should throw an invalid opcode.
