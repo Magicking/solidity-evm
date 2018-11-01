@@ -694,10 +694,13 @@ contract SolidityEVM {
 			ctx.PC++;
 			return;
 		}
-		if (instruction == 0x60) { // PUSH1
+		if (0x60 <= instruction && instruction <= 0x7f) { // PUSH1
+			uint256 out;
 			ctx.GasLeft -= OpCodes[instruction].Gas;
-			_push(ctx, uint256(ctx.Code[ctx.PC+1]));
-			ctx.PC += 2;
+			for (uint i = 0; i < (instruction-0x5f); i++)
+				out |= uint256(ctx.Code[ctx.PC+i+1]) << (i * 8);
+			_push(ctx, out);
+			ctx.PC += instruction-0x5e;
 			return;
 		}
 		if (instruction == 0x10) { // LT
@@ -724,6 +727,33 @@ contract SolidityEVM {
 		if (instruction == 0x15) { // ISZERO
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_push(ctx, _pop(ctx) == 0 ? 1 : 0);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x16) { // AND
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			_push(ctx, r1 & _pop(ctx));
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x17) { // OR
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			_push(ctx, r1 | _pop(ctx));
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x18) { // XOR
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			_push(ctx, r1 ^ _pop(ctx));
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x19) { // NOT
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, _pop(ctx) ^ 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
 			ctx.PC += 1;
 			return;
 		}

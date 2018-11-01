@@ -66,7 +66,7 @@ Other idea: implement an oracle/DNS on top of that.
 
  - [x] STOP
  - [x] ADD
- - [ ] MUL
+ - [x] MUL
  - [ ] SUB
  - [ ] DIV
  - [ ] SDIV
@@ -82,10 +82,10 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] SGT
  - [x] EQ
  - [x] ISZERO
- - [ ] AND
- - [ ] OR
- - [ ] XOR
- - [ ] NOT
+ - [x] AND
+ - [x] OR
+ - [x] XOR
+ - [x] NOT
  - [ ] BYTE
  - [ ] SHA3
  - [ ] ADDRESS
@@ -115,37 +115,37 @@ Other idea: implement an oracle/DNS on top of that.
  - [x] RETURN
  - [ ] SUICIDE
  - [x] PUSH1
- - [ ] PUSH2
- - [ ] PUSH3
- - [ ] PUSH4
- - [ ] PUSH5
- - [ ] PUSH6
- - [ ] PUSH7
- - [ ] PUSH8
- - [ ] PUSH9
- - [ ] PUSH10
- - [ ] PUSH11
- - [ ] PUSH12
- - [ ] PUSH13
- - [ ] PUSH14
- - [ ] PUSH15
- - [ ] PUSH16
- - [ ] PUSH17
- - [ ] PUSH18
- - [ ] PUSH19
- - [ ] PUSH20
- - [ ] PUSH21
- - [ ] PUSH22
- - [ ] PUSH23
- - [ ] PUSH24
- - [ ] PUSH25
- - [ ] PUSH26
- - [ ] PUSH27
- - [ ] PUSH28
- - [ ] PUSH29
- - [ ] PUSH30
- - [ ] PUSH31
- - [ ] PUSH32
+ - [x] PUSH2
+ - [x] PUSH3
+ - [x] PUSH4
+ - [x] PUSH5
+ - [x] PUSH6
+ - [x] PUSH7
+ - [x] PUSH8
+ - [x] PUSH9
+ - [x] PUSH10
+ - [x] PUSH11
+ - [x] PUSH12
+ - [x] PUSH13
+ - [x] PUSH14
+ - [x] PUSH15
+ - [x] PUSH16
+ - [x] PUSH17
+ - [x] PUSH18
+ - [x] PUSH19
+ - [x] PUSH20
+ - [x] PUSH21
+ - [x] PUSH22
+ - [x] PUSH23
+ - [x] PUSH24
+ - [x] PUSH25
+ - [x] PUSH26
+ - [x] PUSH27
+ - [x] PUSH28
+ - [x] PUSH29
+ - [x] PUSH30
+ - [x] PUSH31
+ - [x] PUSH32
  - [ ] DUP1
  - [ ] SWAP1
  - [ ] DUP2
