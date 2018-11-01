@@ -19,7 +19,7 @@ contract('SolidityEVM', function(accounts) {
   });
   it("run pop push1", function() {
     return SolidityEVM.deployed().then(function(instance) {
-      return instance.stopReasonRun.call("0x806042","0x00");
+      return instance.stopReasonRun.call("0x506042","0x00");
     }).then(function(ret) {
       assert.equal(ret.valueOf(), 7, "StackUnderflow was not the exit opcode");
     });

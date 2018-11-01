@@ -721,7 +721,7 @@ contract SolidityEVM {
 			ctx.PC += 1;
 			return;
 		}
-		if (instruction == 0x80) { // POP
+		if (instruction == 0x50) { // POP
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_pop(ctx);
 			ctx.PC += 1;
