@@ -20,6 +20,7 @@ contract SolidityEVM {
 		uint256 RetSize;
 		bytes Code;
 		bytes Input;
+		uint Value;
 		uint PC;
 		int GasLeft;
 		Exception StopReason;
@@ -674,7 +675,10 @@ contract SolidityEVM {
 	* @dev Evaluate the last decoded instruction Solidity flavor
 	*/
 	function eval(Context storage ctx, uint256 instruction) internal {
-		uint256 r1; // us[] is stack, r1 stand for register
+		uint256 r1; // us[] is stack, r stand for register 1, 2, 3
+		uint256 r2;
+		uint256 r3;
+		uint256 i;
 		if (instruction == 0x00) {
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
@@ -695,11 +699,10 @@ contract SolidityEVM {
 			return;
 		}
 		if (0x60 <= instruction && instruction <= 0x7f) { // PUSHXX
-			uint256 out;
 			ctx.GasLeft -= OpCodes[instruction].Gas;
-			for (uint i = 0; i < (instruction-0x5f); i++)
-				out |= uint256(ctx.Code[ctx.PC+i+1]) << (i * 8);
-			_push(ctx, out);
+			for (i = 0; i < (instruction-0x5f); i++)
+				r1 |= uint256(ctx.Code[ctx.PC+i+1]) << (i * 8);
+			_push(ctx, r1);
 			ctx.PC += instruction-0x5e;
 			return;
 		}
@@ -757,6 +760,28 @@ contract SolidityEVM {
 			ctx.PC += 1;
 			return;
 		}
+		if (instruction == 0x34) { // CALLVALUE
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, ctx.Value);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x35) { // CALLDATALOAD
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r2 = _pop(ctx);
+			r3 = ctx.Input.length < 32 ? ctx.Input.length : 32;
+			for (i = 0; i < r3 && (i+r2) < ctx.Input.length; i++)
+				r1 |= uint256(ctx.Input[i+r2]) << ((31-i) * 8);
+			_push(ctx, r1);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x36) { // CALLDATASIZE
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, ctx.Input.length);
+			ctx.PC += 1;
+			return;
+		}
 		if (instruction == 0x50) { // POP
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_pop(ctx);
@@ -784,6 +809,7 @@ contract SolidityEVM {
 		bytes Mem;
 		bytes Code;
 		bytes Input;
+		uint Value;
 		uint PC;
 		int GasLeft;
 	}
@@ -791,17 +817,21 @@ contract SolidityEVM {
 
 	//function runAtAddress(address account, bytes data) ...
 
-	function stackRun(bytes code, bytes data) public returns (uint[]) {
-		return run(code, data).Stack;
+	function memoryRun(bytes code, uint value, bytes data) public returns (bytes) {
+		return run(code, value, data).Mem;
 	}
-	function stopReasonRun(bytes code, bytes data) public returns (Exception) {
-		return run(code, data).StopReason;
+	function stackRun(bytes code, uint value, bytes data) public returns (uint[]) {
+		return run(code, value, data).Stack;
+	}
+	function stopReasonRun(bytes code, uint value, bytes data) public returns (Exception) {
+		return run(code, value, data).StopReason;
 	}
 
-	function run(bytes code, bytes data) public returns (Context) {
+	function run(bytes code, uint value, bytes data) public returns (Context) {
 		Context storage ctx = _ctx;
 		ctx.Code = code;
 		ctx.Input = data;
+		ctx.Value = value;
 		ctx.GasLeft = 0x80000; // TBD
 
 		if (code.length == 0)

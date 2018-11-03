@@ -91,9 +91,9 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] ADDRESS
  - [ ] ORIGIN
  - [ ] CALLER
- - [ ] CALLVALUE
- - [ ] CALLDATALOAD
- - [ ] CALLDATASIZE
+ - [x] CALLVALUE
+ - [x] CALLDATALOAD
+ - [x] CALLDATASIZE
  - [ ] CALLDATACOPY
  - [ ] CODESIZE
  - [ ] CODECOPY
