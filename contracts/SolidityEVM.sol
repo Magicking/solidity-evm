@@ -679,7 +679,7 @@ contract SolidityEVM {
 		uint256 r2;
 		uint256 r3;
 		uint256 i;
-		if (instruction == 0x00) {
+		if (instruction == 0x00) { // STOP
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
 			ctx.Mem[0] = byte(0);
@@ -805,6 +805,42 @@ contract SolidityEVM {
 			ctx.PC += 1;
 			return;
 		}
+		if (instruction == 0x56) { // JUMP
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			if (ctx.Code[r1] != 0x5b) {
+				ctx.StopReason = Exception.InvalidDestination;
+				return;
+			}
+			ctx.PC = r1;
+			return;
+		}
+		if (instruction == 0x57) { // JUMPI
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			r2 = _pop(ctx);
+			if (r2 != 0) {
+				if (ctx.Code[r1] != 0x5b) {
+					ctx.StopReason = Exception.InvalidDestination;
+					return;
+				}
+				ctx.PC = r1;
+			} else {
+				ctx.PC++;
+			}
+			return;
+		}
+		if (instruction == 0x58) { // PC
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, ctx.PC);
+			ctx.PC++;
+			return;
+		}
+		if (instruction == 0x5b) { // JUMPDEST
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			ctx.PC++;
+			return;
+		}
 		if (0x80 <= instruction && instruction <= 0x8f) { // DUPXX
 			if (ctx.StackPtr < instruction-0x7f) {
 				ctx.StopReason = Exception.StackUndeflow;
@@ -836,6 +872,10 @@ contract SolidityEVM {
 		}
 		if (instruction == 0xff) { // SUICIDE
 			// r1 = _pop(ctx);  address for refund should be in us[0]
+			if (ctx.StackPtr == 0) { // Avoid rewriting exception
+				ctx.StopReason = Exception.StackUndeflow;
+				return;
+			}
 			if (ctx.StopReason == Exception.NO_EXCEPTION) // Avoid rewriting exception
 				ctx.StopReason = Exception.Halt;
 			return;

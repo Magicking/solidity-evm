@@ -192,6 +192,30 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0xff, "swap1 failed");
     });
   });
+ it("run push1 0xaa pc", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "60aa58";
+      return instance.stackRun.call("0x"+code, 0, "0x00");
+    }).then(function(ret) {
+      assert.equal(ret[ret.length-1].valueOf(), 2, "pc failed");
+    });
+  });
+ it("run push 0x05 jumpdest push 0x01 swap1 sub dup1 push1 0x02 jumpi push 0x42", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "60015b60019003806002576042";
+      return instance.stackRun.call("0x"+code, 0, "0x00");
+    }).then(function(ret) {
+      assert.equal(ret[1].valueOf(), 0x42, "jump failed");
+    });
+  });
+  it("run push 0x00 jump", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "600056";
+      return instance.stopReasonRun.call("0x"+code, 0, "0x00");
+    }).then(function(ret) {
+      assert.equal(ret.valueOf(), 6, "InvalidDestination was not the exception reason");
+    });
+  });
  it("run push1 0xaa push1 0xbb swap1", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "60aa60bb90";

@@ -101,12 +101,12 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] MLOAD
  - [ ] MSTORE
  - [ ] MSTORE8
- - [ ] JUMP
- - [ ] JUMPI
- - [ ] PC
+ - [x] JUMP
+ - [x] JUMPI
+ - [x] PC
  - [ ] MSIZE
  - [ ] GAS
- - [ ] JUMPDEST
+ - [x] JUMPDEST
  - [ ] LOG0
  - [ ] LOG1
  - [ ] LOG2
