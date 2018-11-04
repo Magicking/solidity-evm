@@ -67,8 +67,8 @@ Other idea: implement an oracle/DNS on top of that.
  - [x] STOP
  - [x] ADD
  - [x] MUL
- - [ ] SUB
- - [ ] DIV
+ - [x] SUB
+ - [x] DIV
  - [ ] SDIV
  - [ ] MOD
  - [ ] SMOD
@@ -113,7 +113,7 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] LOG3
  - [ ] LOG4
  - [x] RETURN
- - [ ] SUICIDE
+ - [x] SUICIDE
  - [x] PUSH1
  - [x] PUSH2
  - [x] PUSH3
@@ -146,35 +146,35 @@ Other idea: implement an oracle/DNS on top of that.
  - [x] PUSH30
  - [x] PUSH31
  - [x] PUSH32
- - [ ] DUP1
- - [ ] SWAP1
- - [ ] DUP2
- - [ ] SWAP2
- - [ ] DUP3
- - [ ] SWAP3
- - [ ] DUP4
- - [ ] SWAP4
- - [ ] DUP5
- - [ ] SWAP5
- - [ ] DUP6
- - [ ] SWAP6
- - [ ] DUP7
- - [ ] SWAP7
- - [ ] DUP8
- - [ ] SWAP8
- - [ ] DUP9
- - [ ] SWAP9
- - [ ] DUP10
- - [ ] SWAP10
- - [ ] DUP11
- - [ ] SWAP11
- - [ ] DUP12
- - [ ] SWAP12
- - [ ] DUP13
- - [ ] SWAP13
- - [ ] DUP14
- - [ ] SWAP14
- - [ ] DUP15
- - [ ] SWAP15
- - [ ] DUP16
- - [ ] SWAP16
+ - [x] DUP1
+ - [x] SWAP1
+ - [x] DUP2
+ - [x] SWAP2
+ - [x] DUP3
+ - [x] SWAP3
+ - [x] DUP4
+ - [x] SWAP4
+ - [x] DUP5
+ - [x] SWAP5
+ - [x] DUP6
+ - [x] SWAP6
+ - [x] DUP7
+ - [x] SWAP7
+ - [x] DUP8
+ - [x] SWAP8
+ - [x] DUP9
+ - [x] SWAP9
+ - [x] DUP10
+ - [x] SWAP10
+ - [x] DUP11
+ - [x] SWAP11
+ - [x] DUP12
+ - [x] SWAP12
+ - [x] DUP13
+ - [x] SWAP13
+ - [x] DUP14
+ - [x] SWAP14
+ - [x] DUP15
+ - [x] SWAP15
+ - [x] DUP16
+ - [x] SWAP16

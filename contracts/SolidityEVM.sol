@@ -698,10 +698,27 @@ contract SolidityEVM {
 			ctx.PC++;
 			return;
 		}
+		if (instruction == 0x03) { // SUB
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			_push(ctx, r1 - _pop(ctx));
+			ctx.PC++;
+			return;
+		}
+		if (instruction == 0x04) { // DIV
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = _pop(ctx);
+			if (r1 == 0)
+				_push(ctx, 0);
+			else
+				_push(ctx, r1 / _pop(ctx));
+			ctx.PC++;
+			return;
+		}
 		if (0x60 <= instruction && instruction <= 0x7f) { // PUSHXX
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			for (i = 0; i < (instruction-0x5f); i++)
-				r1 |= uint256(ctx.Code[ctx.PC+i+1]) << (i * 8);
+				r1 |= uint256(ctx.Code[ctx.PC+i+1]) << (((instruction-0x60)-i) * 8);
 			_push(ctx, r1);
 			ctx.PC += instruction-0x5e;
 			return;
@@ -788,9 +805,37 @@ contract SolidityEVM {
 			ctx.PC += 1;
 			return;
 		}
+		if (0x80 <= instruction && instruction <= 0x8f) { // DUPXX
+			if (ctx.StackPtr < instruction-0x7f) {
+				ctx.StopReason = Exception.StackUndeflow;
+				return;
+			}
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, ctx.Stack[ctx.StackPtr-(instruction-0x7f)]);
+			ctx.PC += 1;
+			return;
+		}
+		if (0x90 <= instruction && instruction <= 0x9f) { // SWAPXX
+			if (ctx.StackPtr < instruction-0x8f) {
+				ctx.StopReason = Exception.StackUndeflow;
+				return;
+			}
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			r1 = ctx.Stack[ctx.StackPtr-1];
+			ctx.Stack[ctx.StackPtr-1] = ctx.Stack[ctx.StackPtr - (instruction-0x8f)];
+			ctx.Stack[ctx.StackPtr - (instruction-0x8f)] = r1;
+			ctx.PC += 1;
+			return;
+		}
 		if (instruction == 0xf3) { // RETURN
 			ctx.RetOffset = _pop(ctx);
 			ctx.RetSize = _pop(ctx) - ctx.RetOffset;
+			if (ctx.StopReason == Exception.NO_EXCEPTION) // Avoid rewriting exception
+				ctx.StopReason = Exception.Halt;
+			return;
+		}
+		if (instruction == 0xff) { // SUICIDE
+			// r1 = _pop(ctx);  address for refund should be in us[0]
 			if (ctx.StopReason == Exception.NO_EXCEPTION) // Avoid rewriting exception
 				ctx.StopReason = Exception.Halt;
 			return;
@@ -833,6 +878,7 @@ contract SolidityEVM {
 		ctx.Input = data;
 		ctx.Value = value;
 		ctx.GasLeft = 0x80000; // TBD
+		ctx.StopReason = Exception.NO_EXCEPTION;
 
 		if (code.length == 0)
 			ctx.StopReason = Exception.InvalidCode;
