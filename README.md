@@ -89,8 +89,8 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] BYTE
  - [ ] SHA3
  - [ ] ADDRESS
- - [ ] ORIGIN
- - [ ] CALLER
+ - [x] ORIGIN
+ - [x] CALLER
  - [x] CALLVALUE
  - [x] CALLDATALOAD
  - [x] CALLDATASIZE

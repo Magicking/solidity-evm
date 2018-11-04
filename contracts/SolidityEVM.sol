@@ -16,6 +16,8 @@ contract SolidityEVM {
 		uint[] Stack;
 		uint StackPtr;
 		bytes Mem;
+		address From;
+		address Origin;
 		uint256 RetOffset;
 		uint256 RetSize;
 		bytes Code;
@@ -777,6 +779,18 @@ contract SolidityEVM {
 			ctx.PC += 1;
 			return;
 		}
+		if (instruction == 0x32) { // ORIGIN
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, uint256(ctx.Origin));
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x33) { // CALLER
+			ctx.GasLeft -= OpCodes[instruction].Gas;
+			_push(ctx, uint256(ctx.From));
+			ctx.PC += 1;
+			return;
+		}
 		if (instruction == 0x34) { // CALLVALUE
 			ctx.GasLeft -= OpCodes[instruction].Gas;
 			_push(ctx, ctx.Value);
@@ -902,21 +916,23 @@ contract SolidityEVM {
 
 	//function runAtAddress(address account, bytes data) ...
 
-	function memoryRun(bytes code, uint value, bytes data) public returns (bytes) {
-		return run(code, value, data).Mem;
+	function memoryRun(address origin, address from, bytes code, uint value, bytes data) public returns (bytes) {
+		return run(origin, from, code, value, data).Mem;
 	}
-	function stackRun(bytes code, uint value, bytes data) public returns (uint[]) {
-		return run(code, value, data).Stack;
+	function stackRun(address origin, address from, bytes code, uint value, bytes data) public returns (uint[]) {
+		return run(origin, from, code, value, data).Stack;
 	}
-	function stopReasonRun(bytes code, uint value, bytes data) public returns (Exception) {
-		return run(code, value, data).StopReason;
+	function stopReasonRun(address origin, address from, bytes code, uint value, bytes data) public returns (Exception) {
+		return run(origin, from, code, value, data).StopReason;
 	}
 
-	function run(bytes code, uint value, bytes data) public returns (Context) {
+	function run(address origin, address from, bytes code, uint value, bytes data) public returns (Context) {
 		Context storage ctx = _ctx;
 		ctx.Code = code;
 		ctx.Input = data;
 		ctx.Value = value;
+		ctx.From = from;
+		ctx.Origin = origin;
 		ctx.GasLeft = 0x80000; // TBD
 		ctx.StopReason = Exception.NO_EXCEPTION;
 
