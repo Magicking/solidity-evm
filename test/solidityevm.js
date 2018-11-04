@@ -128,14 +128,14 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0x77000000000000000000000000000000000000000000000000000000000000ff, "calldataload");
     });
   });
- it("run calldatacopy", function() {
+/* it("run calldatacopy", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "37";
       return instance.memoryRun.call("0x"+code, 0, "0xdeadbeef");
     }).then(function(ret) {
       assert.equal(ret, [0xef,0xbe,0xad,0xde], "calldatacopy");
     });
-  });/*
+  });*/
   it("run 1025 push1 stop", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "6042".repeat(1025)+"00";
@@ -143,5 +143,5 @@ contract('SolidityEVM', function(accounts) {
     }).then(function(ret) {
       assert.equal(ret.valueOf(), 8, "StackOverflow was not the exit opcode");
     });
-  });*/
+  });
 });
