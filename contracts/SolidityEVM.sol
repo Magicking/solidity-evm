@@ -314,7 +314,7 @@ contract SolidityEVM {
 				ctx.StopReason = Exception.Halt;
 			return;
 		}
-		if (instruction == 0xff) { // SUICIDE
+		if (instruction == 0xff) { // SELFDESTRUCT
 			// r1 = _pop(ctx);  address for refund should be in us[0]
 			if (ctx.StackPtr == 0) { // Avoid rewriting exception
 				ctx.StopReason = Exception.StackUndeflow;
