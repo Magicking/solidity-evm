@@ -29,15 +29,6 @@ contract SolidityEVM {
 	}
 
 	Context public _ctx;
-	OpCode[] public OpCodes;
-
-	constructor() public {
-		OpCodes.length = 256; // TBD Metropolis/Byzantium/Custom
-
-
-
-		OpCodes[243].Gas = 0;
-	}
 
 //	/*
 //	* @dev Evaluate the last decoded instruction JULIA flavor
