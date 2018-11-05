@@ -176,12 +176,12 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0x6120, "suicide failed");
     });
   });
- it("run push20 0x6120a7e00f3b2937362dfdac9f80b79f5b55f165 suicide", function() {
+ it("run push20 0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165 suicide", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "736120a7e00f3b2937362dfdac9f80b79f5b55f165ff";
       return instance.stackRun.call(0, 0, "0x"+code, 0, "0x00");
     }).then(function(ret) {
-      assert.equal(ret[0].valueOf(), 0x6120a7e00f3b2937362dfdac9f80b79f5b55f165, "suicide failed");
+      assert.equal(ret[0].valueOf(), 0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165, "suicide failed");
     });
   });
  it("run push1 0xaa push1 0xbb push1 0xcc push1 0xdd push1 0xee push1 0xff swap6", function() {
@@ -227,19 +227,27 @@ contract('SolidityEVM', function(accounts) {
  it("run caller", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "33";
-      return instance.stackRun.call(0, "0x6120a7e00f3b2937362dfdac9f80b79f5b55f165", "0x"+code, 0, "0x00");
+      return instance.stackRun.call(0, "0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165", "0x"+code, 0, "0x00");
     }).then(function(ret) {
-      assert.equal(ret[0].valueOf(), 0x6120a7e00f3b2937362dfdac9f80b79f5b55f165, "origin failed");
+      assert.equal(ret[0].valueOf(), 0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165, "origin failed");
     });
   });
  it("run origin", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "32";
-      return instance.stackRun.call("0x6120a7e00f3b2937362dfdac9f80b79f5b55f165", 0, "0x"+code, 0, "0x00");
+      return instance.stackRun.call("0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165", 0, "0x"+code, 0, "0x00");
     }).then(function(ret) {
-      assert.equal(ret[0].valueOf(), 0x6120a7e00f3b2937362dfdac9f80b79f5b55f165, "origin failed");
+      assert.equal(ret[0].valueOf(), 0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165, "origin failed");
     });
   });
+/* it("run README example", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "608060405260043610603f576000357c0100000000000000000000000000000000000000000000000000000000900463ffffffff1680632be5e0b2146044575b600080fd5b348015604f57600080fd5b5060566058565b005b736120a7e00f3b2937362dfdac9f80b79f5b55f16573ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614151560a557600080fd5b736120a7e00f3b2937362dfdac9f80b79f5b55f16573ffffffffffffffffffffffffffffffffffffffff16ff00a165627a7a723058200d64708a13d80a67474d68eb61b986ff89af6973a20e3902b6e468f3380db4570029";
+      return instance.stopReasonRun.call(0, "0x6120A7E00f3B2937362DFdAc9f80b79f5b55f165", "0x"+code, 0, "0x00");
+    }).then(function(ret) {
+      assert.equal(ret.valueOf(), 9, "Suicide ending failed");
+    });
+  });*/
   it("run 1025 push1 stop", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "6042".repeat(1025)+"00";

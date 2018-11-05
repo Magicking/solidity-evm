@@ -4,7 +4,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/Magicking/solidity-evm/badge.svg?branch=master)](https://coveralls.io/github/Magicking/solidity-evm?branch=master)
 
 Solidity EVM is a restricted Ethereum Virtual Machine interpreter, it
-interprets only `pure` (and exceptions) solidity-wise EVM bytecode otherwise this implementation
+interprets only `view` (and exceptions) solidity-wise EVM bytecode otherwise this implementation
 should throw an invalid opcode.
 
 ## Idea
@@ -30,15 +30,9 @@ contract Landlord {
 
 //Tenant.sol deployed @ 0x832658CEcFC4fb19661C3B8Bbd04A3A3720efe1e
 contract Tenant {
-	address TenantOwner;
-
-	constructor(address owner) {
-		TenantOwner = owner;
-	}
-
-	function _eviction() pure { // function selector 0x2be5e0b2
+	function _eviction() public { // function selector 0x2be5e0b2
 		require(msg.sender == 0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be); // TODO add way to use storage for this particular usage
-		selfdestruct(TenantOwner);
+		selfdestruct(0xc8f8371BDd6FB64388F0D65F43A0040926Ee38be);
 	}
 
 	function constructor(address landlord) {
@@ -113,7 +107,9 @@ Other idea: implement an oracle/DNS on top of that.
  - [ ] LOG3
  - [ ] LOG4
  - [x] RETURN
- - [x] SUICIDE
+ - [ ] REVERT
+ - [ ] INVALID
+ - [x] SELFDESTRUCT
  - [x] PUSH1
  - [x] PUSH2
  - [x] PUSH3
