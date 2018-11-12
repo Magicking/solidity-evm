@@ -111,6 +111,7 @@ contract SolidityEVM {
 		uint256 r2;
 		uint256 r3;
 		uint256 i;
+		bytes memory mem;
 		if (instruction == 0x00) { // STOP
 			if (ctx.Mem.length == 0)
 				ctx.Mem.push(0);
@@ -198,6 +199,22 @@ contract SolidityEVM {
 		if (instruction == 0x19) { // NOT
 			ctx.GasLeft -= 3;
 			_push(ctx, _pop(ctx) ^ 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff);
+			ctx.PC += 1;
+			return;
+		}
+		if (instruction == 0x20) { // SHA3
+			r1 = _pop(ctx);
+			r2 = _pop(ctx);
+			ctx.GasLeft -= 30 + int256(r2 - r1) * 6;
+			r1 = r2 - r1;
+			assembly {
+				mem := mload(0x40)
+				mstore(0x40, add(mem, and(add(add(r1, 0x20), 0x1f), not(0x1f))))
+				//allocate mem
+				//fill
+				//sha3(,)
+				//free
+			}
 			ctx.PC += 1;
 			return;
 		}
@@ -326,7 +343,6 @@ contract SolidityEVM {
 				ctx.StopReason = Exception.Suicide;
 			return;
 		}
-		//SHA3
 		//REVERT
 		//0xaf
 		//0x0d
@@ -350,8 +366,6 @@ contract SolidityEVM {
 		OpCodes[11].Gas = 5;
 		//BYTE
 		OpCodes[26].Gas = 3;
-		//SHA3
-		OpCodes[32].Gas = 30;
 		//ADDRESS
 		OpCodes[48].Gas = 2;
 		//CALLDATACOPY
