@@ -207,9 +207,19 @@ contract SolidityEVM {
 			r2 = _pop(ctx);
 			ctx.GasLeft -= 30 + int256(r2 - r1) * 6;
 			r1 = r2 - r1;
+			r2 = r1;
 			assembly {
 				mem := mload(0x40)
-				mstore(0x40, add(mem, and(add(add(r1, 0x20), 0x1f), not(0x1f))))
+				r2 := and(add(add(r1, 0x20), 0x1f), not(0x1f))
+				mstore(0x40, add(mem, r2)) // boolean trick to pad to 0x20 barrier
+				mstore(mem, r1)
+				for {
+					let cc := 0
+				} lt(cc, r2) {
+					cc := add(cc, 0x20)
+				} {
+					r1 := sload(mem)
+				}
 				//allocate mem
 				//fill
 				//sha3(,)
