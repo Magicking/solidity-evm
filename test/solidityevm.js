@@ -144,6 +144,14 @@ contract('SolidityEVM', function(accounts) {
       assert.equal(ret[0].valueOf(), 0x77000000000000000000000000000000000000000000000000000000000000ff, "calldataload");
     });
   });
+ it("run calldataload sha3", function() {
+    return SolidityEVM.deployed().then(function(instance) {
+      var code = "3520";
+      return instance.stackRun.call(0, 0, "0x"+code, 0, "0x77000000000000000000000000000000000000000000000000000000000000ff");
+    }).then(function(ret) {
+      assert.equal(ret[0].valueOf(), 0xece192811671baad79f5d46fd949c4b7ca5ae2010a9107bccfa9a14baf710632, "calldataload");
+    });
+  });
 /* it("run calldatacopy", function() {
     return SolidityEVM.deployed().then(function(instance) {
       var code = "37";

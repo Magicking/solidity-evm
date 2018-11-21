@@ -208,6 +208,7 @@ contract SolidityEVM {
 			ctx.GasLeft -= 30 + int256(r2 - r1) * 6;
 			r1 = r2 - r1;
 			r2 = r1;
+			bytes storage _mem = ctx.Mem;
 			assembly {
 				mem := mload(0x40)
 				r2 := and(add(add(r1, 0x20), 0x1f), not(0x1f))
@@ -218,13 +219,14 @@ contract SolidityEVM {
 				} lt(cc, r2) {
 					cc := add(cc, 0x20)
 				} {
-					r1 := sload(mem)
+					r1 := sload(add(_mem_slot, cc))
+					mstore(add(add(mem, cc), 0x20), r1)
 				}
 				//allocate mem
-				//fill
 				//sha3(,)
 				//free
 			}
+			_push(ctx, uint256(keccak256(abi.encodePacked(mem))));
 			ctx.PC += 1;
 			return;
 		}
